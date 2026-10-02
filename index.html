@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e293b">
+<title>Reportes de Mantenimiento | Cemento Chagres</title>
+<link rel="icon" href="logocirculo.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reportes Mtto">
+<style>
+  :root{
+    --bg:#eef2f7; --card:#ffffff; --dark:#1e293b; --dark2:#0f172a; --accent:#f59e0b; --accent-d:#d97706;
+    --primary:#2563eb; --primary-d:#1d4ed8; --danger:#dc2626; --ok:#16a34a;
+    --text:#1f2937; --muted:#64748b; --line:#e2e8f0; --radius:14px;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+  body.noscroll{overflow:hidden}
+  svg.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  button{font:inherit;cursor:pointer}
+  [hidden]{display:none!important}
+
+  /* Barra superior */
+  .appbar{position:sticky;top:0;z-index:30;background:var(--dark);color:#fff;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:3px solid var(--accent)}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brand .logo{width:42px;height:42px;border-radius:50%;background:#fff;padding:3px;display:grid;place-items:center;flex:none}
+  .brand .logo img{width:100%;height:100%;object-fit:contain;display:block}
+  .brand strong{display:block;font-size:16px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand small{display:block;color:#94a3b8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  main{max-width:1100px;margin:0 auto;padding:18px 16px 28px}
+
+  .app-footer{background:#fff;border-top:3px solid var(--accent);padding:20px 16px 26px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;text-align:center}
+  .app-footer img{height:46px;width:auto;display:block}
+  body.editing .app-footer{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+
+  /* Botones */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:10px 16px;font-weight:600;font-size:14px;background:#fff;color:var(--text);border-color:var(--line);transition:background .15s,transform .05s,box-shadow .15s;white-space:nowrap;min-height:42px}
+  .btn:active{transform:scale(.98)}
+  .btn:hover{background:#f8fafc}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn.primary:hover{background:var(--primary-d)}
+  .btn.accent{background:var(--accent);color:var(--dark2);border-color:var(--accent)}
+  .btn.accent:hover{background:var(--accent-d)}
+  .btn.dark{background:var(--dark);color:#fff;border-color:var(--dark)}
+  .btn.dark:hover{background:var(--dark2)}
+  .btn.danger{color:var(--danger)}
+  .btn.danger:hover{background:#fef2f2}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{background:rgba(100,116,139,.1)}
+  .btn.sm{padding:6px 10px;min-height:34px;font-size:13px}
+  .icon-btn{width:38px;height:38px;border-radius:9px;display:inline-grid;place-items:center;border:1px solid var(--line);background:#fff;color:var(--text)}
+  .icon-btn:hover{background:#f1f5f9}
+  .icon-btn.danger{color:var(--danger)}
+  .icon-btn:disabled{opacity:.35;cursor:default}
+
+  /* Lista */
+  .list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .list-head h1{margin:0;font-size:24px}
+  .list-head p{margin:2px 0 0;color:var(--muted);font-size:14px}
+  .search{position:relative;margin-bottom:16px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  .search input{width:100%;padding:12px 14px 12px 42px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:15px;box-shadow:var(--shadow)}
+  .report-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .report-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line)}
+  .report-card .thumb{height:140px;background:#e2e8f0 center/cover no-repeat;position:relative;cursor:pointer;display:grid;place-items:center;color:#94a3b8}
+  .report-card .thumb svg{width:42px;height:42px}
+  .report-card .thumb .num{position:absolute;left:10px;top:10px;background:rgba(15,23,42,.85);color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .report-card .thumb .count{position:absolute;right:10px;bottom:10px;background:rgba(15,23,42,.8);color:#fff;font-size:12px;padding:3px 8px;border-radius:6px;display:flex;gap:4px;align-items:center}
+  .report-card .thumb .count svg{width:14px;height:14px}
+  .report-card .body{padding:12px 14px;flex:1;cursor:pointer}
+  .report-card h3{margin:0 0 4px;font-size:16px;line-height:1.3;word-break:break-word}
+  .report-card .meta{color:var(--muted);font-size:13px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;color:#fff;background:var(--muted);letter-spacing:.2px}
+  .report-card .actions{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--line);background:#fafbfc}
+  .report-card .actions .btn{flex:1}
+  .empty{text-align:center;padding:50px 20px;color:var(--muted);background:#fff;border-radius:var(--radius);border:2px dashed var(--line)}
+  .empty svg{width:56px;height:56px;color:#cbd5e1}
+  .empty h3{color:var(--text);margin:10px 0 4px}
+
+  /* Editor */
+  .editor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .status-tag{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:#dcfce7;color:#166534}
+  .status-tag.dirty{background:#fef3c7;color:#92400e}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);padding:18px;margin-bottom:16px}
+  .card h2{margin:0 0 14px;font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--dark);display:flex;align-items:center;gap:10px}
+  .card h2::before{content:"";width:4px;height:18px;background:var(--accent);border-radius:2px}
+  .card h2 .sub{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted);font-size:13px}
+  .title-input{width:100%;font-size:22px;font-weight:700;border:none;border-bottom:2px solid var(--line);padding:8px 2px;background:transparent;color:var(--dark);outline:none;border-radius:0}
+  .title-input:focus{border-bottom-color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px 14px}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .field.full{grid-column:1/-1}
+  .field label,.lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+  .field textarea{min-height:90px;resize:vertical}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  .title-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .title-row .field{flex:1;min-width:180px}
+
+  .photo-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .photo-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column;transition:box-shadow .15s,opacity .15s}
+  .photo-card.drag-over{box-shadow:0 0 0 3px var(--primary)}
+  .photo-card.dragging{opacity:.4}
+  .photo-thumb{position:relative;background:#0f172a;aspect-ratio:4/3;display:grid;place-items:center;cursor:pointer}
+  .photo-thumb img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .badge{position:absolute;left:8px;top:8px;background:var(--accent);color:var(--dark2);font-weight:800;font-size:12px;padding:3px 9px;border-radius:6px}
+  .badge.ann{left:auto;right:8px;background:rgba(15,23,42,.85);color:#fff;font-weight:600}
+  .grip{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.9);color:var(--dark);border-radius:6px;padding:4px;cursor:grab;display:none}
+  .grip svg{width:18px;height:18px}
+  @media (hover:hover) and (pointer:fine){.grip{display:block}}
+  .photo-card textarea{border:none;border-top:1px solid var(--line);padding:10px 12px;font:inherit;font-size:14px;min-height:72px;resize:vertical;outline:none}
+  .photo-card textarea:focus{background:#f8fafc}
+  .photo-tools{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line);background:#fafbfc;align-items:center}
+  .photo-tools .btn{flex:1}
+  .photo-empty{grid-column:1/-1;text-align:center;padding:30px;border:2px dashed var(--line);border-radius:12px;color:var(--muted)}
+
+  .subrep{border-top:4px solid var(--accent)}
+  .sub-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .sub-num{font-weight:800;font-size:13px;letter-spacing:.6px;text-transform:uppercase;background:var(--dark);color:#fff;padding:6px 12px;border-radius:8px}
+  .sub-tools{display:flex;gap:6px}
+  .subrep h3{margin:20px 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:var(--dark);display:flex;justify-content:space-between;align-items:center}
+  .subrep h3 span{font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0;font-size:13px}
+  .add-sub{display:flex;justify-content:center;margin:4px 0 20px}
+  .add-sub .btn{width:100%;max-width:440px;border:2px dashed #94a3b8;background:transparent;color:var(--dark);min-height:54px}
+  .add-sub .btn:hover{background:#fff;border-color:var(--accent)}
+
+  .bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center}
+  .bottom-bar .btn{flex:1;max-width:280px}
+
+  /* Anotador */
+  .ann{position:fixed;inset:0;z-index:100;background:#0b1120;display:flex;flex-direction:column;color:#fff}
+  .ann-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#111827;border-bottom:1px solid #1f2937}
+  .ann-top strong{font-size:15px}
+  .ann-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden}
+  .ann-stage canvas{max-width:100%;max-height:100%;touch-action:none;background:#000;box-shadow:0 10px 40px rgba(0,0,0,.5);cursor:crosshair}
+  .ann-tools{background:#111827;border-top:1px solid #1f2937;padding:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .tool-group{display:flex;gap:4px;background:#1f2937;padding:4px;border-radius:12px;flex-wrap:wrap;justify-content:center}
+  .tool{width:42px;height:42px;border:none;border-radius:9px;background:transparent;color:#cbd5e1;display:grid;place-items:center}
+  .tool:hover{background:#374151;color:#fff}
+  .tool.active{background:var(--accent);color:var(--dark2)}
+  .tool:disabled{opacity:.3}
+  .swatch{width:30px;height:30px;border-radius:50%;border:3px solid #1f2937;margin:6px 3px;box-shadow:0 0 0 1px #4b5563}
+  .swatch.active{box-shadow:0 0 0 3px #fff}
+  .size-dot{background:#cbd5e1;border-radius:50%}
+  .tool.active .size-dot{background:var(--dark2)}
+  .ann .btn{min-height:38px}
+  .ann .btn.ghost{color:#cbd5e1}
+  .ann .btn.ghost:hover{background:#1f2937}
+
+  /* Modal genérico */
+  .modal-back{position:fixed;inset:0;z-index:120;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+  .modal .big-icon{width:60px;height:60px;border-radius:50%;background:#fef3c7;color:var(--accent-d);display:grid;place-items:center;margin:0 auto 10px}
+  .modal .big-icon svg{width:30px;height:30px}
+  .modal h3{margin:4px 0}
+  .modal p{color:var(--muted);margin:4px 0 18px;font-size:14px;word-break:break-all}
+  .modal .stack{display:flex;flex-direction:column;gap:8px}
+
+  .loading{position:fixed;inset:0;z-index:150;background:rgba(15,23,42,.55);display:grid;place-items:center}
+  .loading div{background:#fff;padding:20px 26px;border-radius:14px;display:flex;align-items:center;gap:14px;font-weight:600;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+  .spinner{width:26px;height:26px;border:3px solid #e2e8f0;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--dark);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.error{background:var(--danger)}
+
+  .install-icon{width:76px;height:76px;border-radius:20px;display:block;margin:0 auto 10px;box-shadow:0 6px 18px rgba(15,23,42,.18)}
+  #installTxt{word-break:normal}
+  .ios-steps{text-align:left;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px 14px 12px 32px;margin:0 0 16px;font-size:14px;line-height:1.6}
+  .ios-steps li b{color:var(--dark)}
+
+  @media (max-width:640px){
+    main{padding:14px 10px 24px}
+    .card{padding:14px}
+    .brand small{display:none}
+    .list-head h1{font-size:20px}
+    .title-input{font-size:19px}
+    .bottom-bar .btn span{font-size:13px}
+    .report-grid,.photo-grid{grid-template-columns:1fr}
+    .tool{width:38px;height:38px}
+    .swatch{width:26px;height:26px;margin:6px 2px}
+    .ann-tools{gap:6px;padding:8px}
+  }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="logo"><img src="logocirculo.ico" alt="Cemento Chagres"></div>
+    <div>
+      <strong>Reportes de Mantenimiento</strong>
+      <small>Informes técnicos con registro fotográfico</small>
+    </div>
+  </div>
+  <button id="btnInstall" class="btn sm accent" data-icon="download" hidden>Instalar</button>
+</header>
+
+<main>
+  <!-- LISTADO -->
+  <section id="viewList">
+    <div class="list-head">
+      <div>
+        <h1>Informes guardados</h1>
+        <p id="countTxt">Cargando…</p>
+      </div>
+      <button id="btnNew" class="btn accent" data-icon="plus">Nuevo informe</button>
+    </div>
+    <div class="search">
+      <span data-icon="search"></span>
+      <input id="search" type="search" placeholder="Buscar por título, número, equipo, ubicación…" autocomplete="off">
+    </div>
+    <div id="reportList" class="report-grid"></div>
+    <div id="emptyState" class="empty" hidden>
+      <span data-icon="file"></span>
+      <h3>No hay informes guardados</h3>
+      <p>Cree su primer informe de mantenimiento con fotografías anotadas.</p>
+      <button class="btn accent" id="btnNewEmpty" data-icon="plus">Crear informe</button>
+    </div>
+  </section>
+
+  <!-- EDITOR -->
+  <section id="viewEditor" hidden>
+    <div class="editor-head">
+      <button id="btnBack" class="btn ghost" data-icon="back">Informes</button>
+      <span id="statusTag" class="status-tag">Guardado</span>
+    </div>
+
+    <div class="card">
+      <span class="lbl">Título del informe</span>
+      <input class="title-input" data-f="titulo" placeholder="Ej.: Inspección semanal - Molienda de cemento" maxlength="160">
+      <div class="title-row">
+        <div class="field"><label>N.º de informe</label><input data-f="numero" maxlength="40"></div>
+      </div>
+    </div>
+
+    <div id="subList"></div>
+
+    <div class="add-sub">
+      <button class="btn" id="btnAddSub" data-icon="plus">Agregar otro reporte</button>
+    </div>
+
+    <input type="file" id="inCamera" accept="image/*" capture="environment" hidden>
+    <input type="file" id="inFiles" accept="image/*" multiple hidden>
+
+    <div class="card" style="text-align:center">
+      <button class="btn danger" id="btnDeleteReport" data-icon="trash">Eliminar este informe</button>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn dark" id="btnSave" data-icon="save"><span>Guardar</span></button>
+      <button class="btn accent" id="btnExport" data-icon="share"><span>Compartir / Exportar PDF</span></button>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <img src="logo%20blanco.png" alt="Cemento Chagres">
+  <div>Reportes de Mantenimiento · Cemento Chagres, S.A. © <span id="year"></span></div>
+</footer>
+
+<!-- ANOTADOR -->
+<div id="annotator" class="ann" hidden>
+  <div class="ann-top">
+    <button class="btn ghost" id="annCancel">Cancelar</button>
+    <strong id="annTitle">Anotar fotografía</strong>
+    <button class="btn accent" id="annApply">Aplicar</button>
+  </div>
+  <div class="ann-stage"><canvas id="annCanvas"></canvas></div>
+  <div class="ann-tools">
+    <div class="tool-group" id="toolGroup">
+      <button class="tool active" data-tool="arrow" title="Flecha" data-icon="tArrow"></button>
+      <button class="tool" data-tool="line" title="Línea" data-icon="tLine"></button>
+      <button class="tool" data-tool="circle" title="Círculo / elipse" data-icon="tCircle"></button>
+      <button class="tool" data-tool="rect" title="Rectángulo" data-icon="tRect"></button>
+      <button class="tool" data-tool="marker" title="Marcador numerado" data-icon="tMarker"></button>
+      <button class="tool" data-tool="pen" title="Trazo libre" data-icon="edit"></button>
+      <button class="tool" data-tool="text" title="Texto" data-icon="tText"></button>
+    </div>
+    <div class="tool-group" id="colorGroup"></div>
+    <div class="tool-group" id="sizeGroup">
+      <button class="tool" data-size="2" title="Fino"><span class="size-dot" style="width:6px;height:6px"></span></button>
+      <button class="tool active" data-size="4" title="Medio"><span class="size-dot" style="width:11px;height:11px"></span></button>
+      <button class="tool" data-size="7" title="Grueso"><span class="size-dot" style="width:17px;height:17px"></span></button>
+    </div>
+    <div class="tool-group">
+      <button class="tool" id="annUndo" title="Deshacer" data-icon="undo"></button>
+      <button class="tool" id="annRedo" title="Rehacer" data-icon="redo"></button>
+      <button class="tool" id="annClear" title="Borrar todo" data-icon="trash"></button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF LISTO -->
+<div id="pdfModal" class="modal-back" hidden>
+  <div class="modal">
+    <div class="big-icon" data-icon="file"></div>
+    <h3>PDF generado</h3>
+    <p id="pdfName"></p>
+    <div class="stack">
+      <button class="btn accent" id="pdfShare" data-icon="share">Compartir</button>
+      <button class="btn dark" id="pdfDownload" data-icon="download">Descargar PDF</button>
+      <button class="btn" id="pdfOpen" data-icon="eye">Ver PDF</button>
+      <button class="btn ghost" id="pdfClose">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALAR APP -->
+<div id="installModal" class="modal-back" hidden>
+  <div class="modal">
+    <img src="icon-192.png" alt="" class="install-icon">
+    <h3>Instala la app en tu dispositivo</h3>
+    <p id="installTxt">Accede más rápido desde la pantalla de inicio de tu celular o tablet y úsala incluso sin conexión.</p>
+    <ol id="iosSteps" class="ios-steps" hidden>
+      <li>Toca el botón <b>Compartir</b> (cuadro con flecha hacia arriba) del navegador.</li>
+      <li>Elige <b>“Agregar a pantalla de inicio”</b>.</li>
+      <li>Toca <b>Agregar</b>.</li>
+    </ol>
+    <div class="stack">
+      <button class="btn accent" id="installYes" data-icon="download">Instalar app</button>
+      <button class="btn ghost" id="installNo">Ahora no</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading" class="loading" hidden><div><span class="spinner"></span><span id="loadingTxt">Procesando…</span></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+
+/* ================= ICONOS ================= */
+const ICONS = {
+  wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+  trash:'<path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4h6v2"/>',
+  up:'<path d="M18 15l-6-6-6 6"/>',
+  down:'<path d="M6 9l6 6 6-6"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  grip:'<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
+  tArrow:'<path d="M5 19L19 5M9 5h10v10"/>',
+  tLine:'<path d="M5 19L19 5"/>',
+  tCircle:'<circle cx="12" cy="12" r="8"/>',
+  tRect:'<rect x="4" y="6" width="16" height="12" rx="1"/>',
+  tMarker:'<path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  tText:'<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
+  undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>'
+};
+const icon = n => `<svg class="i" viewBox="0 0 24 24">${ICONS[n]}</svg>`;
+document.querySelectorAll('[data-icon]').forEach(el => el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon)));
+
+/* ================= UTILIDADES ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const hoy = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const ahora = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtFecha = s => { if (!s) return ''; const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; };
+const fmtStamp = t => { const d = new Date(t); return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const clone = o => JSON.parse(JSON.stringify(o));
+
+const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Crítica'];
+const PRIO_COLOR = { 'Baja':'#16a34a', 'Media':'#2563eb', 'Alta':'#ea580c', 'Crítica':'#dc2626' };
+
+let toastTimer;
+function toast(msg, error = false) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.toggle('error', error);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function loading(on, txt = 'Procesando…') {
+  $('#loadingTxt').textContent = txt;
+  $('#loading').hidden = !on;
+}
+
+/* ================= BASE DE DATOS (IndexedDB) ================= */
+const DB = {
+  db: null,
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('reportesMantenimiento', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('reportes', { keyPath: 'id' });
+      r.onsuccess = () => { this.db = r.result; res(); };
+      r.onerror = () => rej(r.error);
+    });
+  },
+  req(mode, fn) {
+    return new Promise((res, rej) => {
+      const q = fn(this.db.transaction('reportes', mode).objectStore('reportes'));
+      q.onsuccess = () => res(q.result);
+      q.onerror = () => rej(q.error);
+    });
+  },
+  all() { return this.req('readonly', s => s.getAll()).then(a => a.map(normalizar)); },
+  get(id) { return this.req('readonly', s => s.get(id)).then(normalizar); },
+  put(r) { return this.req('readwrite', s => s.put(r)); },
+  del(id) { return this.req('readwrite', s => s.delete(id)); }
+};
+
+/* ================= IMÁGENES ================= */
+const imgCache = new Map();
+function loadImg(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('No se pudo cargar la imagen'));
+    img.src = src;
+  });
+}
+async function getImg(foto) {
+  if (!imgCache.has(foto.id)) imgCache.set(foto.id, await loadImg(foto.data));
+  return imgCache.get(foto.id);
+}
+async function compressImage(file, max = 1600, q = 0.85) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.round(img.naturalWidth * s), h = Math.round(img.naturalHeight * s);
+    const cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    return { data: cv.toDataURL('image/jpeg', q), w, h };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+async function renderAnnotated(foto, max, q) {
+  const img = await getImg(foto);
+  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const W = Math.round(img.naturalWidth * s), H = Math.round(img.naturalHeight * s);
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(img, 0, 0, W, H);
+  drawShapes(ctx, foto.formas || [], W, H);
+  return { data: cv.toDataURL('image/jpeg', q), w: W, h: H };
+}
+
+/* ================= DIBUJO DE ANOTACIONES ================= */
+function contrastText(c) { return (c === '#ffffff' || c === '#facc15') ? '#111827' : '#ffffff'; }
+function drawShapes(ctx, shapes, W, H) {
+  const k = Math.max(W, H) / 800;
+  const X = v => v * W, Y = v => v * H;
+  const halo = 'rgba(0,0,0,.45)';
+  for (const s of shapes) {
+    const lw = s.s * k;
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const stroke = path => {
+      ctx.strokeStyle = halo; ctx.lineWidth = lw + 2.5 * k; path(); ctx.stroke();
+      ctx.strokeStyle = s.c; ctx.lineWidth = lw; path(); ctx.stroke();
+    };
+    switch (s.t) {
+      case 'line':
+        stroke(() => { ctx.beginPath(); ctx.moveTo(X(s.x1), Y(s.y1)); ctx.lineTo(X(s.x2), Y(s.y2)); });
+        break;
+      case 'arrow': {
+        const x1 = X(s.x1), y1 = Y(s.y1), x2 = X(s.x2), y2 = Y(s.y2);
+        const a = Math.atan2(y2 - y1, x2 - x1);
+        const len = Math.hypot(x2 - x1, y2 - y1);
+        const h = Math.min(Math.max(lw * 4, 16 * k), len * 0.7);
+        const bx = x2 - Math.cos(a) * h * 0.75, by = y2 - Math.sin(a) * h * 0.75;
+        stroke(() => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(bx, by); });
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - h * Math.cos(a - 0.45), y2 - h * Math.sin(a - 0.45));
+        ctx.lineTo(x2 - h * Math.cos(a + 0.45), y2 - h * Math.sin(a + 0.45));
+        ctx.closePath();
+        ctx.strokeStyle = halo; ctx.lineWidth = 2.5 * k; ctx.stroke();
+        ctx.fillStyle = s.c; ctx.fill();
+        break;
+      }
+      case 'circle': {
+        const cx = X((s.x1 + s.x2) / 2), cy = Y((s.y1 + s.y2) / 2);
+        const rx = Math.max(Math.abs(X(s.x2) - X(s.x1)) / 2, 1), ry = Math.max(Math.abs(Y(s.y2) - Y(s.y1)) / 2, 1);
+        stroke(() => { ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); });
+        break;
+      }
+      case 'rect': {
+        const x = Math.min(X(s.x1), X(s.x2)), y = Math.min(Y(s.y1), Y(s.y2));
+        const w = Math.abs(X(s.x2) - X(s.x1)), h = Math.abs(Y(s.y2) - Y(s.y1));
+        stroke(() => { ctx.beginPath(); ctx.rect(x, y, w, h); });
+        break;
+      }
+      case 'pen':
+        stroke(() => {
+          ctx.beginPath();
+          s.pts.forEach((p, i) => i ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])));
+        });
+        break;
+      case 'marker': {
+        const r = (10 + s.s * 2.2) * k, x = X(s.x), y = Y(s.y);
+        ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 6 * k;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = s.c; ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 2.5 * k; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+        ctx.fillStyle = contrastText(s.c);
+        ctx.font = `bold ${Math.round(r * 1.1)}px Arial, sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(s.n), x, y + r * 0.05);
+        break;
+      }
+      case 'text': {
+        const fs = (14 + s.s * 3) * k, x = X(s.x), y = Y(s.y);
+        ctx.font = `bold ${Math.round(fs)}px Arial, sans-serif`;
+        ctx.textBaseline = 'middle';
+        const w = ctx.measureText(s.txt).width, p = fs * 0.35;
+        ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 6 * k;
+        ctx.fillStyle = s.c;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y - fs / 2 - p, w + p * 2, fs + p * 2, p);
+        else ctx.rect(x, y - fs / 2 - p, w + p * 2, fs + p * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = contrastText(s.c);
+        ctx.fillText(s.txt, x + p, y + fs * 0.05);
+        break;
+      }
+    }
+    ctx.restore();
+  }
+}
+
+/* ================= ESTADO / NAVEGACIÓN ================= */
+let cur = null;
+let dirty = false;
+
+function setDirty(v) {
+  dirty = v;
+  const t = $('#statusTag');
+  t.textContent = v ? 'Cambios sin guardar' : 'Guardado';
+  t.classList.toggle('dirty', v);
+}
+function showView(name) {
+  $('#viewList').hidden = name !== 'list';
+  $('#viewEditor').hidden = name !== 'editor';
+  document.body.classList.toggle('editing', name === 'editor');
+  window.scrollTo(0, 0);
+}
+function nuevoSub(prev) {
+  return { id: uid(), titulo: '', fecha: hoy(), hora: ahora(), ubicacion: prev ? prev.ubicacion : '', equipo: '', prioridad: 'Media', fotos: [] };
+}
+function nuevoReporte() {
+  const d = new Date();
+  return {
+    id: uid(),
+    numero: `RM-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`,
+    titulo: '', creado: Date.now(), actualizado: null,
+    reportes: [nuevoSub()]
+  };
+}
+// Convierte informes guardados con el formato anterior (un solo reporte)
+function normalizar(d) {
+  if (!d || Array.isArray(d.reportes)) return d;
+  return {
+    id: d.id, numero: d.numero, titulo: d.titulo || '', creado: d.creado, actualizado: d.actualizado,
+    reportes: [{ id: uid(), titulo: d.titulo || '', fecha: d.fecha || hoy(), hora: d.hora || '', ubicacion: d.ubicacion || '',
+      equipo: d.equipo || '', prioridad: d.prioridad || 'Media', fotos: d.fotos || [] }]
+  };
+}
+function findFoto(id) {
+  for (const sub of cur.reportes) {
+    const idx = sub.fotos.findIndex(f => f.id === id);
+    if (idx > -1) return { sub, idx };
+  }
+  return null;
+}
+function openEditor(rep, isNew = false) {
+  cur = clone(rep);
+  document.querySelectorAll('[data-f]').forEach(el => { el.value = cur[el.dataset.f] ?? ''; });
+  renderPhotos();
+  setDirty(isNew);
+  showView('editor');
+  if (isNew) setTimeout(() => $('[data-f="titulo"]').focus(), 50);
+}
+async function goList() {
+  if (dirty && !confirm('Hay cambios sin guardar. ¿Desea salir sin guardar?')) return;
+  cur = null;
+  setDirty(false);
+  showView('list');
+  await renderList();
+}
+
+/* ================= LISTADO ================= */
+async function renderList() {
+  const all = (await DB.all()).sort((a, b) => (b.actualizado || b.creado) - (a.actualizado || a.creado));
+  const q = $('#search').value.trim().toLowerCase();
+  const list = q ? all.filter(r => [r.titulo, r.numero, ...r.reportes.flatMap(s => [s.titulo, s.equipo, s.ubicacion])].join(' ').toLowerCase().includes(q)) : all;
+  $('#countTxt').textContent = `${all.length} informe${all.length === 1 ? '' : 's'} guardado${all.length === 1 ? '' : 's'}${q ? ` · ${list.length} coincidencia${list.length === 1 ? '' : 's'}` : ''}`;
+  $('#emptyState').hidden = all.length > 0;
+  const box = $('#reportList');
+  if (all.length && !list.length) {
+    box.innerHTML = '<div class="empty" style="grid-column:1/-1"><h3>Sin resultados</h3><p>No hay informes que coincidan con la búsqueda.</p></div>';
+    return;
+  }
+  box.innerHTML = list.map(r => {
+    const fotos = r.reportes.flatMap(s => s.fotos);
+    const f = fotos[0];
+    const first = r.reportes[0] || {};
+    const nr = r.reportes.length;
+    const prio = PRIORIDADES[Math.max(0, ...r.reportes.map(s => PRIORIDADES.indexOf(s.prioridad)))];
+    const nombres = r.reportes.map(s => s.titulo || s.equipo).filter(Boolean);
+    return `<article class="report-card" data-id="${esc(r.id)}">
+      <div class="thumb" data-act="open"${f ? ` style="background-image:url('${f.data}')"` : ''}>
+        ${f ? '' : icon('image')}
+        <span class="num">${esc(r.numero)}</span>
+        <span class="count">${icon('camera')} ${fotos.length}</span>
+      </div>
+      <div class="body" data-act="open">
+        <h3>${esc(r.titulo || 'Informe sin título')}</h3>
+        <div class="meta">${esc(fmtFecha(first.fecha))} ${esc(first.hora || '')}${first.ubicacion ? ' · ' + esc(first.ubicacion) : ''}</div>
+        <div class="meta">${esc(nombres.slice(0, 3).join(' · '))}${nombres.length > 3 ? '…' : ''}</div>
+        <div class="chips">
+          <span class="chip" style="background:#334155">${nr} reporte${nr === 1 ? '' : 's'}</span>
+          <span class="chip" style="background:${PRIO_COLOR[prio] || '#64748b'}">Prioridad máx. ${esc(prio)}</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn sm" data-act="open">${icon('edit')}Abrir</button>
+        <button class="btn sm" data-act="pdf">${icon('share')}PDF</button>
+        <button class="btn sm danger" data-act="del" title="Eliminar">${icon('trash')}</button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+$('#reportList').addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const id = el.closest('.report-card').dataset.id;
+  const rep = await DB.get(id);
+  if (!rep) return;
+  if (el.dataset.act === 'open') openEditor(rep);
+  else if (el.dataset.act === 'pdf') exportPDF(rep);
+  else if (el.dataset.act === 'del') {
+    if (!confirm(`¿Eliminar el informe "${rep.titulo || rep.numero}"? Esta acción no se puede deshacer.`)) return;
+    await DB.del(id);
+    toast('Informe eliminado');
+    renderList();
+  }
+});
+$('#search').addEventListener('input', renderList);
+$('#btnNew').addEventListener('click', () => openEditor(nuevoReporte(), true));
+$('#btnNewEmpty').addEventListener('click', () => openEditor(nuevoReporte(), true));
+
+/* ================= EDITOR ================= */
+document.addEventListener('input', e => {
+  if (!cur) return;
+  const f = e.target.dataset.f;
+  if (f) { cur[f] = e.target.value; setDirty(true); return; }
+  const sf = e.target.dataset.sf;
+  if (sf) {
+    const sub = cur.reportes.find(s => s.id === e.target.closest('.subrep').dataset.sid);
+    if (sub) { sub[sf] = e.target.value; setDirty(true); }
+    return;
+  }
+  const pid = e.target.dataset.comment;
+  if (pid) {
+    const r = findFoto(pid);
+    if (r) { r.sub.fotos[r.idx].comentario = e.target.value; setDirty(true); }
+  }
+});
+
+async function saveCurrent() {
+  if (!cur.titulo.trim()) {
+    toast('Ingrese el título del informe', true);
+    $('[data-f="titulo"]').focus();
+    return false;
+  }
+  try {
+    cur.actualizado = Date.now();
+    await DB.put(clone(cur));
+    setDirty(false);
+    toast('Informe guardado correctamente');
+    return true;
+  } catch (err) {
+    console.error(err);
+    toast('No se pudo guardar: espacio de almacenamiento insuficiente o error del navegador', true);
+    return false;
+  }
+}
+
+$('#btnSave').addEventListener('click', saveCurrent);
+$('#btnBack').addEventListener('click', goList);
+$('#btnExport').addEventListener('click', async () => {
+  if (dirty && !(await saveCurrent())) return;
+  exportPDF(cur);
+});
+$('#btnDeleteReport').addEventListener('click', async () => {
+  if (!confirm('¿Eliminar este informe completo? Esta acción no se puede deshacer.')) return;
+  await DB.del(cur.id);
+  setDirty(false);
+  toast('Informe eliminado');
+  goList();
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && cur && $('#annotator').hidden) {
+    e.preventDefault();
+    saveCurrent();
+  }
+});
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ----- Reportes y fotografías ----- */
+let uploadSub = null;
+['#inCamera', '#inFiles'].forEach(sel => $(sel).addEventListener('change', async e => {
+  const files = [...e.target.files].filter(f => f.type.startsWith('image/'));
+  e.target.value = '';
+  const sub = cur && cur.reportes.find(s => s.id === uploadSub);
+  if (!files.length || !sub) return;
+  loading(true, 'Procesando fotografías…');
+  let ok = 0;
+  for (const file of files) {
+    try {
+      const { data, w, h } = await compressImage(file);
+      sub.fotos.push({ id: uid(), data, w, h, comentario: '', formas: [] });
+      ok++;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  loading(false);
+  if (ok) { setDirty(true); renderPhotos(); toast(`${ok} fotografía${ok > 1 ? 's' : ''} agregada${ok > 1 ? 's' : ''}`); }
+  if (ok < files.length) toast('Algunas imágenes no se pudieron procesar', true);
+}));
+
+$('#btnAddSub').addEventListener('click', () => {
+  cur.reportes.push(nuevoSub(cur.reportes[cur.reportes.length - 1]));
+  setDirty(true);
+  renderPhotos();
+  const cards = document.querySelectorAll('.subrep');
+  const last = cards[cards.length - 1];
+  last.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  last.querySelector('[data-sf="titulo"]').focus({ preventScroll: true });
+});
+
+const thumbCache = new Map();
+function photoCard(f, i, n) {
+  return `
+    <div class="photo-card" data-id="${f.id}">
+      <div class="photo-thumb" data-act="annotate" title="Tocar para anotar">
+        <img alt="Fotografía ${i + 1}" data-thumb="${f.id}">
+        <span class="badge">Foto ${i + 1}</span>
+        ${f.formas.length ? `<span class="badge ann">${f.formas.length} anotación${f.formas.length > 1 ? 'es' : ''}</span>` : ''}
+        <span class="grip" title="Arrastrar para ordenar">${icon('grip')}</span>
+      </div>
+      <textarea data-comment="${f.id}" placeholder="Comentario de la fotografía ${i + 1}…">${esc(f.comentario)}</textarea>
+      <div class="photo-tools">
+        <button class="icon-btn" data-act="up" title="Mover antes" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button>
+        <button class="icon-btn" data-act="down" title="Mover después" ${i === n - 1 ? 'disabled' : ''}>${icon('down')}</button>
+        <button class="btn sm" data-act="annotate">${icon('edit')}Anotar</button>
+        <button class="icon-btn danger" data-act="delete" title="Eliminar fotografía">${icon('trash')}</button>
+      </div>
+    </div>`;
+}
+function renderPhotos() {
+  const total = cur.reportes.length;
+  $('#subList').innerHTML = cur.reportes.map((r, si) => {
+    const n = r.fotos.length;
+    const opts = PRIORIDADES.map(p => `<option${p === r.prioridad ? ' selected' : ''}>${p}</option>`).join('');
+    return `<div class="card subrep" data-sid="${r.id}">
+      <div class="sub-head">
+        <span class="sub-num">Reporte ${si + 1}${total > 1 ? ` de ${total}` : ''}</span>
+        <div class="sub-tools">
+          <button class="icon-btn" data-act="sub-up" title="Subir reporte" ${si === 0 ? 'disabled' : ''}>${icon('up')}</button>
+          <button class="icon-btn" data-act="sub-down" title="Bajar reporte" ${si === total - 1 ? 'disabled' : ''}>${icon('down')}</button>
+          <button class="icon-btn danger" data-act="sub-del" title="Eliminar reporte" ${total === 1 ? 'disabled' : ''}>${icon('trash')}</button>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="field full"><label>Título del reporte</label><input data-sf="titulo" value="${esc(r.titulo)}" placeholder="Ej.: Fuga de aceite en reductor" maxlength="160"></div>
+        <div class="field"><label>Fecha</label><input type="date" data-sf="fecha" value="${esc(r.fecha)}"></div>
+        <div class="field"><label>Hora</label><input type="time" data-sf="hora" value="${esc(r.hora)}"></div>
+        <div class="field"><label>Ubicación / Área</label><input data-sf="ubicacion" value="${esc(r.ubicacion)}" placeholder="Ej.: Molienda de cemento" maxlength="100"></div>
+        <div class="field"><label>Equipo</label><input data-sf="equipo" value="${esc(r.equipo)}" placeholder="Ej.: Reductor principal" maxlength="100"></div>
+        <div class="field"><label>Prioridad</label><select data-sf="prioridad">${opts}</select></div>
+      </div>
+      <h3>Registro fotográfico <span>${n} foto${n === 1 ? '' : 's'}</span></h3>
+      <div class="photo-actions">
+        <button class="btn dark" data-act="camera">${icon('camera')}Tomar foto</button>
+        <button class="btn" data-act="upload">${icon('image')}Cargar fotos</button>
+      </div>
+      <div class="photo-grid">${n ? r.fotos.map((f, i) => photoCard(f, i, n)).join('')
+        : '<div class="photo-empty">Aún no hay fotografías. Use <b>Tomar foto</b> o <b>Cargar fotos</b> para agregarlas.</div>'}</div>
+    </div>`;
+  }).join('');
+  cur.reportes.flatMap(s => s.fotos).forEach(async f => {
+    const key = JSON.stringify(f.formas);
+    let c = thumbCache.get(f.id);
+    if (!c || c.key !== key) {
+      c = { key, src: (await renderAnnotated(f, 800, 0.8)).data };
+      thumbCache.set(f.id, c);
+    }
+    const img = document.querySelector(`img[data-thumb="${f.id}"]`);
+    if (img) img.src = c.src;
+  });
+}
+
+function movePhoto(sub, from, to) {
+  if (to < 0 || to >= sub.fotos.length || from === to) return;
+  const [f] = sub.fotos.splice(from, 1);
+  sub.fotos.splice(to, 0, f);
+  setDirty(true);
+  renderPhotos();
+}
+
+$('#subList').addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const si = cur.reportes.findIndex(s => s.id === el.closest('.subrep').dataset.sid);
+  const sub = cur.reportes[si];
+  const act = el.dataset.act;
+  if (act === 'camera' || act === 'upload') {
+    uploadSub = sub.id;
+    $(act === 'camera' ? '#inCamera' : '#inFiles').click();
+    return;
+  }
+  if (act === 'sub-up' || act === 'sub-down') {
+    const to = si + (act === 'sub-up' ? -1 : 1);
+    [cur.reportes[si], cur.reportes[to]] = [cur.reportes[to], cur.reportes[si]];
+    setDirty(true);
+    renderPhotos();
+    return;
+  }
+  if (act === 'sub-del') {
+    if (confirm(`¿Eliminar el reporte ${si + 1}${sub.titulo ? ` "${sub.titulo}"` : ''} y sus ${sub.fotos.length} fotografía(s)?`)) {
+      cur.reportes.splice(si, 1);
+      setDirty(true);
+      renderPhotos();
+    }
+    return;
+  }
+  const id = el.closest('.photo-card').dataset.id;
+  const idx = sub.fotos.findIndex(f => f.id === id);
+  switch (act) {
+    case 'up': movePhoto(sub, idx, idx - 1); break;
+    case 'down': movePhoto(sub, idx, idx + 1); break;
+    case 'annotate': openAnnotator(sub.fotos[idx], idx); break;
+    case 'delete':
+      if (confirm(`¿Eliminar la fotografía ${idx + 1}?`)) {
+        sub.fotos.splice(idx, 1);
+        thumbCache.delete(id);
+        setDirty(true);
+        renderPhotos();
+      }
+      break;
+  }
+});
+
+// Ordenar arrastrando (escritorio), activado sólo desde el asa; permite mover fotos entre reportes
+let dragId = null;
+const photoList = $('#subList');
+photoList.addEventListener('mousedown', e => {
+  const g = e.target.closest('.grip');
+  if (g) g.closest('.photo-card').draggable = true;
+});
+photoList.addEventListener('dragstart', e => {
+  const card = e.target.closest('.photo-card');
+  if (!card) return;
+  dragId = card.dataset.id;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragId);
+});
+photoList.addEventListener('dragover', e => {
+  if (!dragId) return;
+  e.preventDefault();
+  const card = e.target.closest('.photo-card');
+  photoList.querySelectorAll('.drag-over').forEach(c => c !== card && c.classList.remove('drag-over'));
+  if (card && card.dataset.id !== dragId) card.classList.add('drag-over');
+});
+photoList.addEventListener('drop', e => {
+  e.preventDefault();
+  const card = e.target.closest('.photo-card');
+  if (card && dragId && card.dataset.id !== dragId) {
+    const src = findFoto(dragId), dst = findFoto(card.dataset.id);
+    const [f] = src.sub.fotos.splice(src.idx, 1);
+    dst.sub.fotos.splice(dst.idx, 0, f);
+    setDirty(true);
+    renderPhotos();
+  }
+});
+photoList.addEventListener('dragend', () => {
+  dragId = null;
+  photoList.querySelectorAll('.photo-card').forEach(c => { c.draggable = false; c.classList.remove('dragging', 'drag-over'); });
+});
+
+/* ================= ANOTADOR ================= */
+const COLORS = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#ffffff', '#111827'];
+const A = { foto: null, shapes: [], redo: [], tool: 'arrow', color: COLORS[0], size: 4, img: null, cur: null, changed: false };
+const cv = $('#annCanvas');
+const actx = cv.getContext('2d');
+
+$('#colorGroup').innerHTML = COLORS.map((c, i) => `<button class="swatch${i === 0 ? ' active' : ''}" data-color="${c}" style="background:${c}" title="Color"></button>`).join('');
+
+async function openAnnotator(foto, idx) {
+  A.foto = foto;
+  A.shapes = clone(foto.formas || []);
+  A.redo = [];
+  A.cur = null;
+  A.changed = false;
+  A.img = await getImg(foto);
+  cv.width = A.img.naturalWidth;
+  cv.height = A.img.naturalHeight;
+  $('#annTitle').textContent = `Anotar fotografía ${idx + 1}`;
+  $('#annotator').hidden = false;
+  document.body.classList.add('noscroll');
+  fitCanvas();
+  annRender();
+}
+function fitCanvas() {
+  if ($('#annotator').hidden || !A.img) return;
+  const st = $('.ann-stage');
+  const aw = st.clientWidth - 20, ah = st.clientHeight - 20;
+  const s = Math.min(aw / cv.width, ah / cv.height);
+  cv.style.width = Math.floor(cv.width * s) + 'px';
+  cv.style.height = Math.floor(cv.height * s) + 'px';
+}
+window.addEventListener('resize', fitCanvas);
+function closeAnnotator() {
+  $('#annotator').hidden = true;
+  document.body.classList.remove('noscroll');
+  A.foto = null;
+}
+function annRender() {
+  actx.clearRect(0, 0, cv.width, cv.height);
+  actx.drawImage(A.img, 0, 0, cv.width, cv.height);
+  drawShapes(actx, A.cur ? A.shapes.concat([A.cur]) : A.shapes, cv.width, cv.height);
+  $('#annUndo').disabled = !A.shapes.length;
+  $('#annRedo').disabled = !A.redo.length;
+  $('#annClear').disabled = !A.shapes.length;
+}
+function annPush(s) {
+  A.shapes.push(s);
+  A.redo = [];
+  A.changed = true;
+  annRender();
+}
+function annPos(e) {
+  const r = cv.getBoundingClientRect();
+  const cl = v => Math.min(1, Math.max(0, v));
+  return { x: cl((e.clientX - r.left) / r.width), y: cl((e.clientY - r.top) / r.height) };
+}
+
+cv.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  const p = annPos(e);
+  const base = { c: A.color, s: A.size };
+  if (A.tool === 'marker') {
+    annPush({ t: 'marker', x: p.x, y: p.y, n: A.shapes.filter(s => s.t === 'marker').length + 1, ...base });
+    return;
+  }
+  if (A.tool === 'text') {
+    const txt = prompt('Texto de la anotación:');
+    if (txt && txt.trim()) annPush({ t: 'text', x: p.x, y: p.y, txt: txt.trim().slice(0, 80), ...base });
+    return;
+  }
+  cv.setPointerCapture(e.pointerId);
+  A.cur = A.tool === 'pen'
+    ? { t: 'pen', pts: [[p.x, p.y]], ...base }
+    : { t: A.tool, x1: p.x, y1: p.y, x2: p.x, y2: p.y, ...base };
+});
+cv.addEventListener('pointermove', e => {
+  if (!A.cur) return;
+  const p = annPos(e);
+  if (A.cur.t === 'pen') A.cur.pts.push([+p.x.toFixed(4), +p.y.toFixed(4)]);
+  else { A.cur.x2 = p.x; A.cur.y2 = p.y; }
+  annRender();
+});
+function annEnd() {
+  if (!A.cur) return;
+  const s = A.cur;
+  A.cur = null;
+  const valid = s.t === 'pen' ? s.pts.length > 1 : Math.hypot(s.x2 - s.x1, s.y2 - s.y1) > 0.01;
+  if (valid) annPush(s); else annRender();
+}
+cv.addEventListener('pointerup', annEnd);
+cv.addEventListener('pointercancel', annEnd);
+
+$('#toolGroup').addEventListener('click', e => {
+  const b = e.target.closest('[data-tool]');
+  if (!b) return;
+  A.tool = b.dataset.tool;
+  document.querySelectorAll('#toolGroup .tool').forEach(t => t.classList.toggle('active', t === b));
+});
+$('#colorGroup').addEventListener('click', e => {
+  const b = e.target.closest('[data-color]');
+  if (!b) return;
+  A.color = b.dataset.color;
+  document.querySelectorAll('#colorGroup .swatch').forEach(t => t.classList.toggle('active', t === b));
+});
+$('#sizeGroup').addEventListener('click', e => {
+  const b = e.target.closest('[data-size]');
+  if (!b) return;
+  A.size = +b.dataset.size;
+  document.querySelectorAll('#sizeGroup .tool').forEach(t => t.classList.toggle('active', t === b));
+});
+function annUndo() { if (A.shapes.length) { A.redo.push(A.shapes.pop()); A.changed = true; annRender(); } }
+function annRedo() { if (A.redo.length) { A.shapes.push(A.redo.pop()); A.changed = true; annRender(); } }
+$('#annUndo').addEventListener('click', annUndo);
+$('#annRedo').addEventListener('click', annRedo);
+$('#annClear').addEventListener('click', () => {
+  if (A.shapes.length && confirm('¿Borrar todas las anotaciones de esta fotografía?')) {
+    A.shapes = []; A.redo = []; A.changed = true; annRender();
+  }
+});
+$('#annCancel').addEventListener('click', () => {
+  if (A.changed && !confirm('¿Descartar los cambios de anotación?')) return;
+  closeAnnotator();
+});
+$('#annApply').addEventListener('click', () => {
+  if (A.changed) {
+    A.foto.formas = A.shapes;
+    setDirty(true);
+    renderPhotos();
+  }
+  closeAnnotator();
+});
+document.addEventListener('keydown', e => {
+  if ($('#annotator').hidden) return;
+  if (e.key === 'Escape') $('#annCancel').click();
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? annRedo() : annUndo(); }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); annRedo(); }
+});
+
+/* ================= GENERADOR PDF (sin librerías) ================= */
+// Logo incrustado (JPEG 360x100) para que el PDF funcione también al abrir el archivo localmente
+const LOGO = { w: 360, h: 100, b64: [
+'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'
+].join('') };
+const WIN_ANSI = { 0x20AC:0x80, 0x201A:0x82, 0x2026:0x85, 0x2018:0x91, 0x2019:0x92, 0x201C:0x93, 0x201D:0x94, 0x2022:0x95, 0x2013:0x96, 0x2014:0x97 };
+function pdfStr(str) {
+  let out = '';
+  for (const ch of String(str ?? '')) {
+    const c = ch.codePointAt(0);
+    let b = c < 128 || (c >= 160 && c < 256) ? c : (WIN_ANSI[c] ?? 63);
+    if (b < 32) b = 32;
+    const s = String.fromCharCode(b);
+    out += (s === '\\' || s === '(' || s === ')') ? '\\' + s : s;
+  }
+  return out;
+}
+const measureCtx = document.createElement('canvas').getContext('2d');
+function textW(str, size, bold) {
+  measureCtx.font = `${bold ? 'bold ' : ''}100px Helvetica, Arial, sans-serif`;
+  return measureCtx.measureText(str).width * size / 100;
+}
+function wrapText(str, size, bold, maxW) {
+  const lines = [];
+  for (const para of String(str ?? '').replace(/\r/g, '').split('\n')) {
+    if (!para.trim()) { lines.push(''); continue; }
+    let line = '';
+    for (let word of para.split(/\s+/).filter(Boolean)) {
+      while (textW(word, size, bold) > maxW) {
+        let i = word.length;
+        while (i > 1 && textW(word.slice(0, i), size, bold) > maxW) i--;
+        if (line) { lines.push(line); line = ''; }
+        lines.push(word.slice(0, i));
+        word = word.slice(i);
+      }
+      const test = line ? line + ' ' + word : word;
+      if (textW(test, size, bold) <= maxW) line = test;
+      else { lines.push(line); line = word; }
+    }
+    if (line) lines.push(line);
+  }
+  while (lines.length && !lines[lines.length - 1]) lines.pop();
+  return lines;
+}
+function fitText(str, size, bold, maxW) {
+  str = String(str ?? '');
+  if (textW(str, size, bold) <= maxW) return str;
+  while (str.length && textW(str + '…', size, bold) > maxW) str = str.slice(0, -1);
+  return str + '…';
+}
+
+async function buildPDF(r, onProgress) {
+  const PW = 595.28, PH = 841.89, M = 40, CW = PW - 2 * M, BOTTOM = PH - 52;
+  const C = { dark:'#1e293b', accent:'#f59e0b', text:'#1f2937', muted:'#64748b', line:'#cbd5e1', light:'#f8fafc', white:'#ffffff' };
+  const n2 = v => (+v).toFixed(2);
+  const rgb = h => { const n = parseInt(h.slice(1), 16); return `${n2(((n >> 16) & 255) / 255)} ${n2(((n >> 8) & 255) / 255)} ${n2((n & 255) / 255)}`; };
+
+  const pages = [], images = [{ name: 'Logo', w: LOGO.w, h: LOGO.h, data: atob(LOGO.b64) }];
+  let P, y;
+  const op = s => P.ops.push(s);
+  const rect = (x, yy, w, h, fill, stroke, lw = 0.7) => {
+    let s = '';
+    if (fill) s += `${rgb(fill)} rg `;
+    if (stroke) s += `${rgb(stroke)} RG ${n2(lw)} w `;
+    s += `${n2(x)} ${n2(PH - yy - h)} ${n2(w)} ${n2(h)} re ${fill && stroke ? 'B' : fill ? 'f' : 'S'}`;
+    op(s);
+  };
+  const line = (x1, y1, x2, y2, col, lw = 0.7) => op(`${rgb(col)} RG ${n2(lw)} w ${n2(x1)} ${n2(PH - y1)} m ${n2(x2)} ${n2(PH - y2)} l S`);
+  const text = (str, x, yy, size, o = {}) => {
+    const bold = !!o.bold;
+    if (o.align === 'right') x -= textW(str, size, bold);
+    else if (o.align === 'center') x -= textW(str, size, bold) / 2;
+    op(`BT /${bold ? 'F2' : 'F1'} ${n2(size)} Tf ${rgb(o.color || C.text)} rg ${n2(x)} ${n2(PH - yy)} Td (${pdfStr(str)}) Tj ET`);
+  };
+  const image = (name, x, yy, w, h) => { op(`q ${n2(w)} 0 0 ${n2(h)} ${n2(x)} ${n2(PH - yy - h)} cm /${name} Do Q`); P.imgs.push(name); };
+
+  const titulo = r.titulo || 'Informe sin título';
+  const subs = r.reportes;
+  const totalFotos = subs.reduce((a, s) => a + s.fotos.length, 0);
+  const newPage = (first = false) => {
+    P = { ops: [], imgs: [] };
+    pages.push(P);
+    if (first) return;
+    rect(0, 0, PW, 6, C.dark);
+    image('Logo', M, 13, 72, 20);
+    text(fitText(titulo, 9, true, CW - 260), M + 84, 29, 9, { bold: true, color: C.dark });
+    text(`Informe N.º ${r.numero}`, PW - M, 30, 8, { align: 'right', color: C.muted });
+    line(M, 38, PW - M, 38, C.accent, 1.2);
+    y = 56;
+  };
+  const chip = (x, yy, label, color) => {
+    const w = textW(label, 7.5, true) + 16;
+    rect(x, yy, w, 16, color);
+    text(label, x + 8, yy + 11, 7.5, { bold: true, color: C.white });
+    return w;
+  };
+
+  /* ---- Página 1: encabezado ---- */
+  newPage(true);
+  rect(0, 0, PW, 96, C.white);
+  rect(0, 96, PW, 4, C.accent);
+  image('Logo', M, 23, 180, 50);
+  const fechas = subs.map(s => s.fecha).filter(Boolean).sort();
+  const rango = !fechas.length ? '' : fechas[0] === fechas[fechas.length - 1]
+    ? fmtFecha(fechas[0]) : `${fmtFecha(fechas[0])} – ${fmtFecha(fechas[fechas.length - 1])}`;
+  const bx = PW - M - 175;
+  rect(bx, 22, 175, 56, '#f1f5f9', '#e2e8f0', 0.6);
+  rect(bx, 22, 3, 56, C.accent);
+  text('INFORME N.º', bx + 14, 37, 7, { bold: true, color: C.muted });
+  text(fitText(r.numero, 12, true, 150), bx + 14, 53, 12, { bold: true, color: C.dark });
+  text(rango, bx + 14, 68, 8.5, { color: C.muted });
+
+  y = 126;
+  text('INFORME TÉCNICO DE MANTENIMIENTO', M, y, 9.5, { bold: true, color: '#d97706' });
+  text(`${subs.length} reporte${subs.length > 1 ? 's' : ''}  ·  ${totalFotos} fotografía${totalFotos === 1 ? '' : 's'}`, PW - M, y, 9, { align: 'right', color: C.muted });
+  y += 26;
+  for (const l of wrapText(titulo, 19, true, CW)) { text(l, M, y, 19, { bold: true, color: C.dark }); y += 24; }
+
+  /* ---- Cuadrícula de fotos: elige las columnas que dan imágenes más grandes dentro del espacio disponible ---- */
+  let fotoN = 0;
+  const drawGrid = async (fotos, startIdx, si, top) => {
+    const n = fotos.length;
+    const ims = [];
+    for (const f of fotos) {
+      onProgress && onProgress(++fotoN, totalFotos);
+      const im = await renderAnnotated(f, n > 2 ? 1000 : 1400, 0.82);
+      const name = 'Im' + (images.length + 1);
+      images.push({ name, w: im.w, h: im.h, data: atob(im.data.split(',')[1]) });
+      ims.push({ name, w: im.w, h: im.h });
+    }
+    const gap = 10, capH = 16, lead = 10.5, L = n <= 2 ? 3 : 2, comH = L * lead + 8;
+    const avail = BOTTOM - top;
+    let best = null;
+    for (let cols = 1; cols <= Math.min(n, 6); cols++) {
+      const rows = Math.ceil(n / cols);
+      const cw = (CW - gap * (cols - 1)) / cols;
+      const ch = (avail - gap * (rows - 1)) / rows;
+      const bw = cw - 8, bh = ch - capH - comH - 8;
+      if (bh < 30 && !(cols === Math.min(n, 6) && !best)) continue;
+      const area = ims.reduce((a, im) => { const s = Math.min(bw / im.w, Math.max(bh, 20) / im.h); return a + im.w * im.h * s * s; }, 0);
+      if (!best || area > best.area) best = { cols, cw, bw, bh: Math.max(bh, 20), area };
+    }
+    const { cols, cw, bw, bh } = best;
+    let yy = top;
+    for (let r0 = 0; r0 < n; r0 += cols) {
+      const row = ims.slice(r0, r0 + cols);
+      const sizes = row.map(im => { const s = Math.min(bw / im.w, bh / im.h); return { w: im.w * s, h: im.h * s }; });
+      const rowImgH = Math.max(...sizes.map(s => s.h));
+      const cellH = rowImgH + 8 + capH + comH;
+      row.forEach((im, j) => {
+        const f = fotos[r0 + j], sz = sizes[j];
+        const x = M + j * (cw + gap);
+        rect(x, yy, cw, rowImgH + 8, C.light);
+        image(im.name, x + (cw - sz.w) / 2, yy + 4 + (rowImgH - sz.h) / 2, sz.w, sz.h);
+        const cy = yy + rowImgH + 8;
+        rect(x, cy, cw, capH, C.dark);
+        rect(x, cy, 3, capH, C.accent);
+        text(`FOTO ${subs.length > 1 ? `${si + 1}.` : ''}${startIdx + r0 + j + 1}`, x + 9, cy + 11, 7.5, { bold: true, color: C.white });
+        const nf = (f.formas || []).length;
+        if (nf && cw > 150) text(`${nf} anotación${nf > 1 ? 'es' : ''}`, x + cw - 7, cy + 11, 6.5, { align: 'right', color: '#cbd5e1' });
+        const has = !!(f.comentario && f.comentario.trim());
+        let lines = wrapText(has ? f.comentario : 'Sin comentario.', 8.5, false, cw - 14).filter(Boolean);
+        if (lines.length > L) { lines = lines.slice(0, L); lines[L - 1] = fitText(lines[L - 1] + '…', 8.5, false, cw - 14); }
+        lines.forEach((l, k) => text(l, x + 7, cy + capH + 12.5 + k * lead, 8.5, { color: has ? C.text : C.muted }));
+        rect(x, yy, cw, cellH, null, C.line, 0.6);
+      });
+      yy += cellH + gap;
+    }
+  };
+
+  /* ---- Reportes: 1 página cada uno (2 si tiene más de 4 fotos) ---- */
+  for (let si = 0; si < subs.length; si++) {
+    const sb = subs[si];
+    if (si > 0) newPage(); else y += 4;
+    rect(M, y, CW, 36, C.dark);
+    rect(M, y, 4, 36, C.accent);
+    text(`REPORTE ${si + 1} DE ${subs.length}`, M + 14, y + 13, 7.5, { bold: true, color: C.accent });
+    const pr = `PRIORIDAD: ${String(sb.prioridad || 'Media').toUpperCase()}`;
+    const prw = textW(pr, 7.5, true) + 16;
+    text(fitText(sb.titulo || `Reporte ${si + 1}`, 12, true, CW - prw - 34), M + 14, y + 28, 12, { bold: true, color: C.white });
+    chip(PW - M - prw - 10, y + 10, pr, PRIO_COLOR[sb.prioridad] || '#64748b');
+    y += 36;
+
+    const datos = [['Fecha', fmtFecha(sb.fecha)], ['Hora', sb.hora], ['Ubicación / Área', sb.ubicacion], ['Equipo', sb.equipo]];
+    const cw = CW / 2, rh = 30;
+    for (let i = 0; i < datos.length; i += 2) {
+      for (let j = 0; j < 2; j++) {
+        const d = datos[i + j];
+        const x = M + j * cw;
+        rect(x, y, cw, rh, C.light, C.line, 0.6);
+        text(d[0].toUpperCase(), x + 9, y + 11, 6.8, { bold: true, color: C.muted });
+        text(fitText(d[1] || '—', 10, false, cw - 18), x + 9, y + 24, 10, { color: C.text });
+      }
+      y += rh;
+    }
+    y += 12;
+
+    const n = sb.fotos.length;
+    if (!n) { text('Sin fotografías registradas.', M, y + 8, 9.5, { color: C.muted }); continue; }
+    const k = n <= 4 ? n : Math.ceil(n / 2);
+    await drawGrid(sb.fotos.slice(0, k), 0, si, y);
+    if (n > k) {
+      newPage();
+      rect(M, y, CW, 24, C.dark);
+      rect(M, y, 4, 24, C.accent);
+      text(fitText(`REPORTE ${si + 1} DE ${subs.length}${sb.titulo ? ' · ' + sb.titulo : ''} (continuación)`, 9, true, CW - 28), M + 14, y + 16, 9, { bold: true, color: C.white });
+      y += 34;
+      await drawGrid(sb.fotos.slice(k), k, si, y);
+    }
+  }
+
+  /* ---- Pies de página ---- */
+  const gen = fmtStamp(Date.now());
+  pages.forEach((p, i) => {
+    P = p;
+    line(M, PH - 38, PW - M, PH - 38, C.line, 0.5);
+    text(`Informe N.º ${r.numero}`, M, PH - 25, 7.5, { color: C.muted });
+    text(`Generado: ${gen}`, PW / 2, PH - 25, 7.5, { align: 'center', color: C.muted });
+    text(`Página ${i + 1} de ${pages.length}`, PW - M, PH - 25, 7.5, { bold: true, align: 'right', color: C.dark });
+  });
+
+  /* ---- Ensamblado del archivo PDF ---- */
+  const objs = [];
+  const add = b => { objs.push(b); return objs.length; };
+  add('<< /Type /Catalog /Pages 2 0 R >>');
+  add('');
+  const f1 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  const f2 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  const imgRef = {};
+  for (const im of images) {
+    imgRef[im.name] = add(`<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${im.data.length} >>\nstream\n${im.data}\nendstream`);
+  }
+  const kids = [];
+  for (const p of pages) {
+    const content = p.ops.join('\n');
+    const c = add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    const xo = p.imgs.map(nm => `/${nm} ${imgRef[nm]} 0 R`).join(' ');
+    kids.push(add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >>${xo ? ` /XObject << ${xo} >>` : ''} >> /Contents ${c} 0 R >>`));
+  }
+  objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
+  const d = new Date();
+  const info = add(`<< /Title (${pdfStr(titulo)}) /Subject (${pdfStr('Informe de mantenimiento ' + r.numero)}) /Producer (Reportes de Mantenimiento) /CreationDate (D:${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}) >>`);
+
+  let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+  const offsets = [];
+  objs.forEach((b, i) => { offsets.push(out.length); out += `${i + 1} 0 obj\n${b}\nendobj\n`; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offsets.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+
+  const bytes = new Uint8Array(out.length);
+  for (let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+  return new Blob([bytes], { type: 'application/pdf' });
+}
+
+/* ================= EXPORTAR / COMPARTIR ================= */
+let pdfState = null;
+function pdfFileName(r) {
+  const slug = (r.titulo || 'reporte').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 50);
+  return `${(r.numero || 'RM').replace(/[^a-zA-Z0-9-]+/g, '_')}_${slug || 'reporte'}.pdf`;
+}
+async function exportPDF(r) {
+  loading(true, 'Generando PDF…');
+  try {
+    const blob = await buildPDF(r, (i, n) => $('#loadingTxt').textContent = `Generando PDF… foto ${i} de ${n}`);
+    if (pdfState) URL.revokeObjectURL(pdfState.url);
+    const name = pdfFileName(r);
+    pdfState = { blob, name, url: URL.createObjectURL(blob), rep: r };
+    $('#pdfName').textContent = `${name} · ${(blob.size / 1048576).toFixed(2)} MB`;
+    const file = new File([blob], name, { type: 'application/pdf' });
+    $('#pdfShare').hidden = !(navigator.canShare && navigator.canShare({ files: [file] }));
+    $('#pdfModal').hidden = false;
+  } catch (err) {
+    console.error(err);
+    toast('Error al generar el PDF', true);
+  } finally {
+    loading(false);
+  }
+}
+function downloadPDF() {
+  const a = document.createElement('a');
+  a.href = pdfState.url;
+  a.download = pdfState.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  toast('PDF descargado');
+}
+$('#pdfDownload').addEventListener('click', downloadPDF);
+$('#pdfOpen').addEventListener('click', () => {
+  const w = window.open(pdfState.url, '_blank');
+  if (!w) downloadPDF();
+});
+$('#pdfShare').addEventListener('click', async () => {
+  const file = new File([pdfState.blob], pdfState.name, { type: 'application/pdf' });
+  try {
+    await navigator.share({
+      files: [file],
+      title: pdfState.rep.titulo || 'Informe de mantenimiento',
+      text: `Informe de mantenimiento ${pdfState.rep.numero} - ${pdfState.rep.titulo || ''}`
+    });
+  } catch (err) {
+    if (err.name !== 'AbortError') { toast('No se pudo compartir; se descargará el PDF', true); downloadPDF(); }
+  }
+});
+$('#pdfClose').addEventListener('click', () => { $('#pdfModal').hidden = true; });
+$('#pdfModal').addEventListener('click', e => { if (e.target.id === 'pdfModal') $('#pdfModal').hidden = true; });
+
+/* ================= INSTALACIÓN (PWA) ================= */
+let deferredPrompt = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMobile = isIOS || /android|mobile|tablet/i.test(navigator.userAgent) || matchMedia('(pointer:coarse)').matches;
+
+function showInstall() {
+  $('#iosSteps').hidden = !!deferredPrompt;
+  $('#installYes').hidden = !deferredPrompt;
+  $('#installNo').textContent = deferredPrompt ? 'Ahora no' : 'Entendido';
+  $('#installModal').hidden = false;
+}
+function autoShowInstall() {
+  if (isStandalone() || !isMobile || localStorage.getItem('rm_install_visto')) return;
+  localStorage.setItem('rm_install_visto', '1');
+  showInstall();
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('#btnInstall').hidden = false;
+  autoShowInstall();
+});
+if (isIOS && !isStandalone()) {
+  $('#btnInstall').hidden = false;
+  setTimeout(autoShowInstall, 1200);
+}
+$('#btnInstall').addEventListener('click', showInstall);
+$('#installNo').addEventListener('click', () => { $('#installModal').hidden = true; });
+$('#installYes').addEventListener('click', async () => {
+  $('#installModal').hidden = true;
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  if (outcome === 'accepted') $('#btnInstall').hidden = true;
+});
+window.addEventListener('appinstalled', () => {
+  $('#btnInstall').hidden = true;
+  $('#installModal').hidden = true;
+  toast('App instalada correctamente');
+});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
+}
+
+/* ================= INICIO ================= */
+(async () => {
+  $('#year').textContent = new Date().getFullYear();
+  try {
+    await DB.open();
+    await renderList();
+  } catch (err) {
+    console.error(err);
+    $('#countTxt').textContent = 'El almacenamiento del navegador no está disponible.';
+    toast('No se pudo acceder al almacenamiento del navegador', true);
+  }
+})();
+</script>
+</body>
+</html>
